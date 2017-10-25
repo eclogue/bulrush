@@ -43,9 +43,6 @@ class Poroutine
             return $res;
         }
         $value = $this->coroutine->current();
-//        echo '*******';
-//        var_dump($value);
-//        echo '*******';
         $this->coroutine->send($value);
         return $value;
     }
@@ -64,10 +61,8 @@ class Poroutine
     {
         $coStack = new SplStack;
         $value = null;
-        $i = 1;
         for(;;) {
             try {
-//                echo '||---->' . $i++ . PHP_EOL;
                 if ($this->exception) {
                     $gen->throw($this->exception);
                     $this->exception = null;

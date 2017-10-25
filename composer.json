@@ -9,6 +9,11 @@
     "autoload": {
         "psr-4": {"Bulrush\\": "src/"}
     },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
     "repositories": {
         "packagist": {
             "type": "composer",
