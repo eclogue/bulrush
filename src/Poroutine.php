@@ -1,5 +1,4 @@
 <?php
-
 /**
  * @license MIT
  * @copyright Copyright (c) 2017
@@ -44,6 +43,7 @@ class Poroutine
         }
         $value = $this->coroutine->current();
         $this->coroutine->send($value);
+
         return $value;
     }
 
@@ -85,10 +85,11 @@ class Poroutine
 
                     $gen = $coStack->pop();
                     $gen->send($value);
+                    yield $value;
                     continue;
                 }
 
-                yield $gen->send($value);
+                $gen->send($value);
                 yield $value;
 
             } catch (RuntimeException $e) {

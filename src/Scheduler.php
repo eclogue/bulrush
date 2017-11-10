@@ -48,14 +48,10 @@ class Scheduler
         $this->schedule($task);
     }
 
-    public function test()
-    {
-        $this->queue->enqueue(1);
-    }
-
 
     public function schedule(Poroutine $task)
     {
+        echo '----->------' . PHP_EOL;
         $this->queue->enqueue($task);
     }
 }
