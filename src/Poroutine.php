@@ -22,10 +22,13 @@ class Poroutine
 
     private $value = null;
 
+    private $return = false;
 
-    public function __construct($co)
+
+    public function __construct(Generator $co, bool $return)
     {
         $this->coroutine = $this->stack($co);
+        $this->return = $return;
     }
 
 
@@ -42,7 +45,7 @@ class Poroutine
             return $res;
         }
         $value = $this->coroutine->current();
-        $this->coroutine->send($value);
+        $this->coroutine->next();
 
         return $value;
     }
@@ -83,6 +86,9 @@ class Poroutine
                         return $value;
                     }
 
+                    if ($this->return) {
+                        $value = $gen->getReturn();
+                    }
                     $gen = $coStack->pop();
                     $gen->send($value);
                     yield $value;

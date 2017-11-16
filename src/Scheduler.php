@@ -43,15 +43,14 @@ class Scheduler
     }
 
 
-    public function add(Generator $co) {
-        $task = new Poroutine($co);
+    public function add(Generator $co, bool $return = false) {
+        $task = new Poroutine($co, $return);
         $this->schedule($task);
     }
 
 
     public function schedule(Poroutine $task)
     {
-        echo '----->------' . PHP_EOL;
         $this->queue->enqueue($task);
     }
 }
