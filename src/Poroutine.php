@@ -51,7 +51,6 @@ class Poroutine
         $value = $this->coroutine->current();
         $this->coroutine->next();
         $this->send($value);
-
         return $value;
     }
 
@@ -81,10 +80,11 @@ class Poroutine
                     if ($this->return) {
                         $value = $gen->getReturn();
                     }
-                    if ($coStack->isEmpty()) {
-                        return $value;
-                    }
 
+                    if ($coStack->isEmpty()) {
+                        yield $value;
+                        break;
+                    }
 
                     $gen = $coStack->pop();
                     $gen->send($value);
@@ -92,9 +92,7 @@ class Poroutine
                     continue;
                 }
 
-                if ($gen->valid()) {
-                    $value = $gen->current();
-                }
+                $value = $gen->current();
                 if ($value instanceof Generator) {
                     $coStack->push($gen); // 保存当前的 generator
                     $gen = $value;
