@@ -16,6 +16,8 @@ class Scheduler
 
     private $queue;
 
+    private $value;
+
     public function __construct()
     {
         $this->queue = new \SplQueue();
@@ -36,10 +38,13 @@ class Scheduler
                 continue;
             }
             if ($task->isFinish()) {
+                $this->value = $task->getValue();
                 continue;
             }
             $this->schedule($task);
         }
+
+        return $this->value;
     }
 
 

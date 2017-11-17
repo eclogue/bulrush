@@ -37,6 +37,10 @@ class Poroutine
         $this->value = $value;
     }
 
+    public function getValue() {
+        return $this->value;
+    }
+
     public function run()
     {
         if ($this->exception) {
@@ -46,6 +50,7 @@ class Poroutine
         }
         $value = $this->coroutine->current();
         $this->coroutine->next();
+        $this->send($value);
 
         return $value;
     }
@@ -72,26 +77,27 @@ class Poroutine
                     continue;
                 }
 
+                if (!$gen->valid()) {
+                    if ($this->return) {
+                        $value = $gen->getReturn();
+                    }
+                    if ($coStack->isEmpty()) {
+                        return $value;
+                    }
+
+
+                    $gen = $coStack->pop();
+                    $gen->send($value);
+                    yield $value;
+                    continue;
+                }
+
                 if ($gen->valid()) {
                     $value = $gen->current();
                 }
                 if ($value instanceof Generator) {
                     $coStack->push($gen); // 保存当前的 generator
                     $gen = $value;
-                    continue;
-                }
-
-                if (!$gen->valid()) {
-                    if ($coStack->isEmpty()) {
-                        return $value;
-                    }
-
-                    if ($this->return) {
-                        $value = $gen->getReturn();
-                    }
-                    $gen = $coStack->pop();
-                    $gen->send($value);
-                    yield $value;
                     continue;
                 }
 
