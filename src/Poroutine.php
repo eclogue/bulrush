@@ -24,11 +24,14 @@ class Poroutine
 
     private $return = false;
 
+    public $taskId = '';
 
-    public function __construct(Generator $co, bool $return)
+
+    public function __construct(Generator $co, bool $return = false)
     {
         $this->coroutine = $this->stack($co);
         $this->return = $return;
+        $this->taskId = uniqid();
     }
 
 
@@ -49,8 +52,9 @@ class Poroutine
             return $res;
         }
         $value = $this->coroutine->current();
-        $this->coroutine->next();
+        $this->coroutine->send($value);
         $this->send($value);
+
         return $value;
     }
 
@@ -75,12 +79,17 @@ class Poroutine
                     $this->exception = null;
                     continue;
                 }
+                $value = $gen->current();
+                if ($value instanceof Generator) {
+                    $coStack->push($gen); // 保存当前的 generator
+                    $gen = $value;
+                    continue;
+                }
 
                 if (!$gen->valid()) {
                     if ($this->return) {
                         $value = $gen->getReturn();
                     }
-
                     if ($coStack->isEmpty()) {
                         yield $value;
                         break;
@@ -89,13 +98,6 @@ class Poroutine
                     $gen = $coStack->pop();
                     $gen->send($value);
                     yield $value;
-                    continue;
-                }
-
-                $value = $gen->current();
-                if ($value instanceof Generator) {
-                    $coStack->push($gen); // 保存当前的 generator
-                    $gen = $value;
                     continue;
                 }
 
@@ -113,5 +115,14 @@ class Poroutine
         }
 
         return $value;
+    }
+
+    public function resolve()
+    {
+        while (!$this->isFinish()) {
+            $this->run();
+        }
+
+        return $this->value;
     }
 }
