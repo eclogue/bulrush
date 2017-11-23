@@ -72,7 +72,7 @@ class Poroutine
     {
         $coStack = new SplStack;
         $value = null;
-        for(;;) {
+        while(true) {
             try {
                 if ($this->exception) {
                     $gen->throw($this->exception);
@@ -91,6 +91,7 @@ class Poroutine
                         $value = $gen->getReturn();
                     }
                     if ($coStack->isEmpty()) {
+//                        yield $value;
                         yield $value;
                         break;
                     }
@@ -121,6 +122,7 @@ class Poroutine
     {
         while (!$this->isFinish()) {
             $this->run();
+//            var_dump($this->isFinish());
         }
 
         return $this->value;
