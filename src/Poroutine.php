@@ -32,6 +32,7 @@ class Poroutine
         $this->coroutine = $this->stack($co);
         $this->return = $return;
         $this->taskId = uniqid();
+        $this->stack = new SplStack();
     }
 
 
@@ -70,7 +71,6 @@ class Poroutine
 
     public function stack(Generator $gen)
     {
-        $coStack = new SplStack;
         $value = null;
         while(true) {
             try {
@@ -79,38 +79,41 @@ class Poroutine
                     $this->exception = null;
                     continue;
                 }
-                $value = $gen->current();
-                if ($value instanceof Generator) {
-                    $coStack->push($gen); // 保存当前的 generator
-                    $gen = $value;
-                    continue;
-                }
 
                 if (!$gen->valid()) {
                     if ($this->return) {
                         $value = $gen->getReturn();
+                        if ($value instanceof Generator && $value->valid()) {
+                            $this->stack->push($value);
+                            $gen = $value;
+                            continue;
+                        }
                     }
-                    if ($coStack->isEmpty()) {
-//                        yield $value;
+
+                    if ($this->stack->isEmpty()) {
                         yield $value;
                         break;
                     }
 
-                    $gen = $coStack->pop();
-                    $gen->send($value);
-                    yield $value;
+                    $gen = $this->stack->pop();
+                    yield $gen->send($value);
                     continue;
                 }
 
-                $gen->send($value);
-                yield $value;
+                $value = $gen->current();
+                if ($value instanceof Generator) {
+                    $this->stack->push($gen); // 保存当前的 generator
+                    $gen = $value;
+                    continue;
+                }
 
+                yield $gen->send($value);
             } catch (RuntimeException $e) {
-                if ($coStack->isEmpty()) {
+                if ($this->stack->isEmpty()) {
                     throw $e;
                 }
 
-                $gen = $coStack->pop();
+                $gen = $this->stack->pop();
                 $this->exception = $e;
             }
         }
@@ -122,9 +125,9 @@ class Poroutine
     {
         while (!$this->isFinish()) {
             $this->run();
-//            var_dump($this->isFinish());
         }
 
         return $this->value;
     }
+
 }

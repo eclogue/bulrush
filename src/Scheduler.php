@@ -46,7 +46,7 @@ class Scheduler
             }
 
             if ($task->isFinish()) {
-                $this->buffer[$task->taskId] = $task->getValue();
+//                $this->buffer[$task->taskId] = $task->getValue();
                 continue;
             }
 
