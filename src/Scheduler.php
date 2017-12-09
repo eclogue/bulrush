@@ -27,7 +27,7 @@ class Scheduler
     public function __construct()
     {
         $this->queue = new \SplQueue();
-        $this->tasks = new \SplStack();
+//        $this->tasks = new \SplStack();
     }
 
     public function run()
@@ -56,26 +56,25 @@ class Scheduler
         return true;
     }
 
-    public function take()
-    {
-        if ($this->count()) {
-            throw new \Exception('Scheduler is not finish');
-        }
-        if ($this->tasks->isEmpty()) {
-            return null;
-        }
-        $taskId = $this->tasks->pop();
-
-
-        return $this->buffer[$taskId] ?? null;
-
-    }
+//    public function take()
+//    {
+//        if ($this->count()) {
+//            throw new \Exception('Scheduler is not finish');
+//        }
+//        if ($this->tasks->isEmpty()) {
+//            return null;
+//        }
+//        $taskId = $this->tasks->pop();
+//
+//
+//        return $this->buffer[$taskId] ?? null;
+//
+//    }
 
 
     public function add(Generator $co, bool $return = false)
     {
         $task = new Poroutine($co, $return);
-        $this->tasks->push($task->taskId);
         $this->schedule($task);
     }
 
@@ -89,4 +88,5 @@ class Scheduler
     {
         return $this->queue->count();
     }
+
 }

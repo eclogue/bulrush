@@ -107,7 +107,8 @@ class Poroutine
                     continue;
                 }
 
-                yield $gen->send($value);
+                $gen->send($value);
+                yield $value;
             } catch (RuntimeException $e) {
                 if ($this->stack->isEmpty()) {
                     throw $e;
@@ -121,13 +122,14 @@ class Poroutine
         return $value;
     }
 
-    public function resolve()
+    public static function resolve(Generator $gen)
     {
-        while (!$this->isFinish()) {
-            $this->run();
+        $co = new static($gen, true);
+        while (!$co->isFinish()) {
+            $co->run();
         }
 
-        return $this->value;
+        return $co->value;
     }
 
 }
