@@ -109,13 +109,14 @@ class Poroutine
 
                 $gen->send($value);
                 yield $value;
-            } catch (RuntimeException $e) {
+            } catch (RuntimeException $err) {
                 if ($this->stack->isEmpty()) {
-                    throw $e;
+                    $this->exception = $err;
+                    $gen->throw($err);
+                } else {
+                    $gen = $this->stack->pop();
+                    $this->exception = $err;
                 }
-
-                $gen = $this->stack->pop();
-                $this->exception = $e;
             }
         }
 
